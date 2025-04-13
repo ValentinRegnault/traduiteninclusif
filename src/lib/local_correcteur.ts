@@ -1,6 +1,6 @@
-import nomsDicoUrl from "/public/noms_flexions.csv.gz?url";
-import participesDicoUrl from "/public/participes.csv.gz?url";
-import adjectifsDicoUrl from "/public/adjectifs_flexions.csv.gz?url"
+import nomsDicoUrl from "/public/noms_flexions.csv?url";
+import participesDicoUrl from "/public/participes.csv?url";
+import adjectifsDicoUrl from "/public/adjectifs_flexions.csv?url"
 
 // ---- TYPES ----
 
@@ -96,6 +96,9 @@ export async function initDictionnaires() {
     adjectifs = await fetch(adjectifsDicoUrl)
         .then((resp) => resp.text())
         .then(parseDico)
+
+    console.log(noms, participes, adjectifs);
+
 }
 
 /**

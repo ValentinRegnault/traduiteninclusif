@@ -44,7 +44,7 @@
   <a href="/" class="btn btn-ghost text-xl">
     <img src={logo} alt="traduire en inclusif" class="h-full" />
   </a>
-  <div class="navbar-start">
+  <div class="navbar-start hidden md:block">
     <ul class="flex gap-8">
       <li><a href="#traducteur" class="btn btn-ghost">Traducteur</a></li>
       <li>
