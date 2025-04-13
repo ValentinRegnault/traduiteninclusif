@@ -96,9 +96,6 @@ export async function initDictionnaires() {
     adjectifs = await fetch(adjectifsDicoUrl)
         .then((resp) => resp.text())
         .then(parseDico)
-
-    console.log(noms, participes, adjectifs);
-
 }
 
 /**
@@ -109,7 +106,11 @@ export async function initDictionnaires() {
  * @param chaineCourante 
  * @param representationPrecedente 
  */
-export async function actualiserTexteAbstrait(ancienTexteAbstrait: TexteAbstrait, nouveauTexte: string, options: OptionsTexteAbstrait = new OptionsTexteAbstrait()): Promise<TexteAbstrait> {
+export async function actualiserTexteAbstrait(
+    ancienTexteAbstrait: TexteAbstrait,
+    nouveauTexte: string,
+    options: OptionsTexteAbstrait = new OptionsTexteAbstrait()
+): Promise<TexteAbstrait> {
     const nouveauTexteAbstrait = await creerTexteAbstrait(nouveauTexte, options);
     const correspondance = faireCorrespondreTextesAbstraits(ancienTexteAbstrait, nouveauTexteAbstrait);
 
@@ -127,43 +128,62 @@ export async function actualiserTexteAbstrait(ancienTexteAbstrait: TexteAbstrait
 * @param options les stratégies par défault à adopter pour rendre les mots inclusifs
 * @returns une tableau de tokens (sequence de tokens)
 */
-export async function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait): Promise<TexteAbstrait> {
-    return texte.split(/( )|(\n)|(\.)|(\!)|(\!)|(')|(,)|(;)|(-)/) // split les espaces (sans les garder) et isole les "\n" 
+export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait): TexteAbstrait {
+    let tab = texte
+        .split(/( )|(\n)|(\.)|(\!)|(\!)|(')|(,)|(;)|(-)/)
         .filter(part => part !== undefined && part !== "")
-        .map(mot => {
-            let motLow = mot.toLowerCase()
-            if (motLow in determinants.masculinPlurielVersMasculinSingulier) {
-                return new MotGenre(mot, options.strategieDeterminantsMasculinPluriels);
-            }
-            else if (motLow in determinants.masculinSingulierVersFlexion) {
-                return new MotGenre(mot, options.strategieDeterminantsMasculinSingulier);
-            }
-            else if (motLow in adjectifs.masculinPlurielVersMasculinSingulier) {
-                return new MotGenre(mot, options.strategieAdjectifsMasculinPluriels);
-            }
-            else if (motLow in adjectifs.masculinSingulierVersFlexion) {
-                return new MotGenre(mot, options.strategieAdjectifsMasculinSingulier);
-            }
-            else if (motLow in noms.masculinPlurielVersMasculinSingulier) {
-                return new MotGenre(mot, options.strategieNomMasculinPluriels);
-            }
-            else if (motLow in noms.masculinSingulierVersFlexion) {
-                return new MotGenre(mot, options.strategieNomMasculinSingulier);
-            }
-            else if (motLow in participes.masculinPlurielVersMasculinSingulier) {
-                return new MotGenre(mot, options.strategieParticipesMasculinPluriel);
-            }
-            else if (motLow in participes.masculinSingulierVersFlexion) {
-                return new MotGenre(mot, options.strategieParticipesMasculinSingulier);
-            }
+
+    let result: TexteAbstrait = []
+
+    for (let i = 0; i < tab.length; i++) {
+        let mot = tab[i];
+        let motLow = mot.toLowerCase()
+        if (motLow in determinants.masculinPlurielVersMasculinSingulier) {
+            result[i] = new MotGenre(mot, options.strategieDeterminantsMasculinPluriels);
+        }
+        else if (motLow in determinants.masculinSingulierVersFlexion) {
+            if (i + 2 >= tab.length) result[i] = new Mot(mot);
             else {
-                return new Mot(mot);
+                if (recupererFlexions(tab[i + 2])?.natureMot == "NOM" && aUnFeminin(tab[i + 2])) {
+                    // si le mot suivant (i + 2, avec l'espace) est un nom qui a un feminin
+                    result[i] = new MotGenre(mot, options.strategieDeterminantsMasculinSingulier);
+                }
+                else result[i] = new Mot(mot);
             }
-        })
+        }
+        else if (motLow in adjectifs.masculinPlurielVersMasculinSingulier) {
+            result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinPluriels);
+        }
+        else if (motLow in adjectifs.masculinSingulierVersFlexion) {
+            result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulier);
+        }
+        else if (motLow in noms.masculinPlurielVersMasculinSingulier) {
+            result[i] = new MotGenre(mot, options.strategieNomMasculinPluriels);
+        }
+        else if (motLow in noms.masculinSingulierVersFlexion) {
+            result[i] = new MotGenre(mot, options.strategieNomMasculinSingulier);
+        }
+        else if (motLow in participes.masculinPlurielVersMasculinSingulier) {
+            result[i] = new MotGenre(mot, options.strategieParticipesMasculinPluriel);
+        }
+        else if (motLow in participes.masculinSingulierVersFlexion) {
+            result[i] = new MotGenre(mot, options.strategieParticipesMasculinSingulier);
+        }
+        else {
+            result[i] = new Mot(mot);
+        }
+    }
+
+    console.log("result : ", result);
+
+
+    return result;
 }
 
 export function enInclusifDoublon(mot: string): [string, string | null] {
     const motData = recupererFlexions(mot);
+    if (!motData) throw "enInclusifDoublon - Mot introuvable dans les dictionnaire";
+
 
     let { flexions, accordMot, masculinSingulier } = motData;
 
@@ -209,6 +229,7 @@ export function enInclusifDoublon(mot: string): [string, string | null] {
 */
 export function enInclusifPointMedian(mot: string): [string, string | null] {
     const motData = recupererFlexions(mot);
+    if (!motData) throw "enInclusifPointMedian - Mot introuvable dans les dictionnaire";
 
     if (motData.exception) return ["", motData.exception!]
 
@@ -232,12 +253,11 @@ export function enInclusifPointMedian(mot: string): [string, string | null] {
 export function aUnFeminin(mot: string): boolean {
     const motData = recupererFlexions(mot);
 
+    if (!motData) return false;
+
     if (motData.exception) return true;
 
     let { flexions, masculinSingulier } = motData;
-
-    console.log(masculinSingulier, flexions);
-
 
     return (flexions[1] != "" || flexions[2] != "")
 }
@@ -251,7 +271,7 @@ function recupererFlexions(mot: string): {
     accordMot: "PLURIEL" | "SINGULIER"
     masculinSingulier: string,
     exception: string | undefined
-} {
+} | undefined {
     let motLow = mot.toLowerCase()
     if (motLow in determinants.masculinPlurielVersMasculinSingulier) {
         const masculinSingulier = determinants.masculinPlurielVersMasculinSingulier[motLow]
@@ -343,7 +363,7 @@ function recupererFlexions(mot: string): {
             exception: (participes.formePointMedianExeption ?? {})[motLow] ?? undefined
         };
     } else {
-        throw new Error("recupererFlexions - Mot introuvable dans les dictionnaires");
+        return undefined
     }
 }
 
@@ -369,7 +389,7 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
     // Trouver la partie identique au début
     let i = 0;
     while (i < texteAbstrait1.length && i < texteAbstrait2.length && texteAbstrait1[i].texteConcret === texteAbstrait2[i].texteConcret) {
-        debut.push(texteAbstrait1[i]);
+        debut.push(choisirEntreDeuxMots(texteAbstrait1[i], texteAbstrait2[i]));
         i++;
     }
 
@@ -377,7 +397,7 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
     let j = texteAbstrait1.length - 1;
     let k = texteAbstrait2.length - 1;
     while (j >= i && k >= i && texteAbstrait1[j].texteConcret === texteAbstrait2[k].texteConcret) {
-        fin.unshift(texteAbstrait1[j]);
+        fin.unshift(choisirEntreDeuxMots(texteAbstrait1[i], texteAbstrait2[i]));
         j--;
         k--;
     }
@@ -388,6 +408,18 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
     return [debut, partieInseree, fin];
 }
 
+
+function choisirEntreDeuxMots(mot1: Mot, mot2: Mot) {
+    // Si l'un des deux est MotGenre et pas l'autre, on le retourne
+    if (mot1 instanceof MotGenre && !(mot2 instanceof MotGenre)) return mot1
+    else if (!(mot1 instanceof MotGenre) && mot2 instanceof MotGenre) return mot2
+    // Si les deux sont Mot, on retourne mot1
+    else if (!(mot1 instanceof MotGenre) && !(mot2 instanceof MotGenre)) return mot1
+    // Par défault on retourne le mot1, sauf si le mot2 à une stratégie plus précise que DEMANDER
+    else if ((mot1 as MotGenre).strategieInclusif == "DEMANDER" && (mot2 as MotGenre).strategieInclusif != "DEMANDER") return mot2
+    else return mot1
+
+}
 
 
 function formesPointMedian(
@@ -401,9 +433,6 @@ function formesPointMedian(
 
     const inclusifSingulier = "⋅" + marqueFeminin
     const marquePluriel = femininPlur.slice(partieCommune.length + marqueFeminin.length)
-
-    console.log(mot, marqueFeminin, marquePluriel);
-
 
     if (marqueFeminin == "")
         return null
