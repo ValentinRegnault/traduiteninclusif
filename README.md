@@ -1,47 +1,65 @@
-# Svelte + TS + Vite
+# Traducteur Automatique en Écriture Inclusive 🌈✨
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+Bienvenue dans le projet **Traducteur Automatique en Écriture Inclusive** ! 🎉 Ce projet vise à promouvoir une communication plus équitable et représentative en automatisant la conversion de textes en écriture inclusive. Grâce à des dictionnaires de mots et leurs flexions (masculin/féminin, singulier/pluriel), notre outil facilite l'adoption de cette pratique linguistique essentielle.
 
-## Recommended IDE Setup
+## Pourquoi l'Écriture Inclusive ? 🤔
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+L'écriture inclusive est bien plus qu'une simple tendance linguistique ; c'est un moyen puissant de reconnaître et de valoriser la diversité. En utilisant des formes de langage qui incluent explicitement toutes les identités de genre, nous contribuons à :
 
-## Need an official Svelte framework?
+- **Renforcer l'égalité** : En rendant visible la présence des femmes et des personnes non-binaires dans le langage. 👩‍💼👨‍💼
+- **Promouvoir la diversité** : En reflétant la richesse et la variété des identités dans notre société. 🌍
+- **Favoriser l'inclusion** : En créant un environnement où chacun·e se sent représenté·e et respecté·e. 🤝
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## Fonctionnalités 🛠️
 
-## Technical considerations
+- **Dictionnaires Intégrés** : Utilisation de dictionnaires pour gérer les flexions de genre et de nombre. 📚
+- **Automatisation** : Conversion automatique de textes en écriture inclusive. 🤖
+- **Personnalisation** : Possibilité d'ajouter ou de modifier des règles de flexion selon vos besoins spécifiques. ⚙️
 
-**Why use this over SvelteKit?**
+## Comment ça Marche ? ⚙️
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+1. **Analyse du Texte** : Le texte d'entrée est analysé pour identifier les mots nécessitant une flexion inclusive. 🔍
+2. **Application des Règles** : Les règles de flexion sont appliquées en utilisant les dictionnaires intégrés. 📜
+3. **Génération du Texte Inclusif** : Un texte en écriture inclusive est généré, prêt à être utilisé. 📝
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+## Installation 💻
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+Pour utiliser le Traducteur Automatique en Écriture Inclusive, suivez ces étapes simples :
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+1. **Clonez le Dépôt** :
+   ```bash
+   git clone https://github.com/ValentinRegnault/traduiteninclusif.git
+   ```
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+2. **Installez les Dépendances** :
+   ```bash
+   cd traduiteninclusif
+   npm install
+   ```
 
-**Why include `.vscode/extensions.json`?**
+3. **Lancez l'Outil** :
+   ```bash
+   npm run dev # ouvrez votre navigateur à l'adresse http://localhost:5173 !
+   ```
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+## Contribution 🤝
 
-**Why enable `allowJs` in the TS template?**
+Les contributions pour améliorer et enrichir ce projet sont bienvenues ! Si vous souhaitez contribuer, voici comment procéder :
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+1. **Fork** le dépôt.
+2. Créez une branche pour votre feature (`git checkout -b feature/nouvelle-feature`).
+3. **Commit** vos modifications (`git commit -am 'Ajout d'une nouvelle feature'`).
+4. **Push** vers la branche (`git push origin feature/nouvelle-feature`).
+5. Ouvrez une **Pull Request**.
 
-**Why is HMR not preserving my local component state?**
+## Licence 📜
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
+## Contact 📧
 
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+Pour toute question ou suggestion, n'hésitez pas à me contacter à [valentinregnault22@gmail.com](mailto:valentinregnault22@gmail.com).
+
+---
+
+Rejoignez-nous dans cette initiative pour rendre notre langage plus inclusif et représentatif ! 🌈✨
