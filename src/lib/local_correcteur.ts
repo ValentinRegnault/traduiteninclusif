@@ -128,7 +128,7 @@ export async function actualiserTexteAbstrait(ancienTexteAbstrait: TexteAbstrait
 * @returns une tableau de tokens (sequence de tokens)
 */
 export async function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait): Promise<TexteAbstrait> {
-    return texte.split(/( )|(\n)|(\.)|(\!)|(\!)/) // split les espaces (sans les garder) et isole les "\n" 
+    return texte.split(/( )|(\n)|(\.)|(\!)|(\!)|(')|(,)|(;)|(-)/) // split les espaces (sans les garder) et isole les "\n" 
         .filter(part => part !== undefined && part !== "")
         .map(mot => {
             let motLow = mot.toLowerCase()
