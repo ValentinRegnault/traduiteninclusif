@@ -9,6 +9,7 @@
     enInclusifPointMedian,
     enInclusifDoublon,
     type StrategieInclusif,
+    texteAbstraitVersTexteConcret,
   } from "./lib/local_correcteur";
   import "./app.css";
   import logo from "./assets/logo.png";
@@ -26,7 +27,7 @@
   let hasBeenCopied = $state(false);
   function copyToClipboard() {
     navigator.clipboard
-      .writeText("")
+      .writeText(texteAbstraitVersTexteConcret(texteAbstrait))
       .then(() => {
         hasBeenCopied = true;
         setTimeout(() => {

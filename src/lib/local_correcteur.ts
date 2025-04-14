@@ -261,6 +261,32 @@ export function aUnFeminin(mot: string): boolean {
 }
 
 
+export function texteAbstraitVersTexteConcret(texteAbstrait: TexteAbstrait): string {
+    let texte = ""
+    for (let i = 0; i < texteAbstrait.length; i++) {
+        if (texteAbstrait[i] instanceof MotGenre) {
+            if ((texteAbstrait[i] as MotGenre).strategieInclusif == "DOUBLON") {
+                let doublon = enInclusifDoublon(texteAbstrait[i].texteConcret.toLowerCase())
+                if (doublon[1] != null) {
+                    texte += doublon[0] + doublon[1]
+                    continue
+                }
+            }
+            else if ((texteAbstrait[i] as MotGenre).strategieInclusif == "POINT MÉDIAN") {
+                let median = enInclusifPointMedian(texteAbstrait[i].texteConcret.toLowerCase())
+                if (median[1] != null) {
+                    texte += median[0] + median[1]
+                    continue
+                }
+            }
+        }
+
+        texte += texteAbstrait[i].texteConcret
+    }
+
+    return texte
+}
+
 // ---- FONCTIONS PRIVÉES ----
 
 function recupererFlexions(mot: string): {
