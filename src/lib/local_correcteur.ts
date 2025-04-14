@@ -31,8 +31,8 @@ export class OptionsTexteAbstrait {
     constructor(
         public strategieNomMasculinSingulier: StrategieInclusif = "DEMANDER",
         public strategieNomMasculinPluriels: StrategieInclusif = "DOUBLON",
-        public strategieParticipesMasculinSingulier: StrategieInclusif = "POINT MÉDIAN",
-        public strategieParticipesMasculinPluriel: StrategieInclusif = "POINT MÉDIAN",
+        public strategieParticipesMasculinSingulier: StrategieInclusif = "DEMANDER",
+        public strategieParticipesMasculinPluriel: StrategieInclusif = "DEMANDER",
         public strategieAdjectifsMasculinSingulier: StrategieInclusif = "DEMANDER",
         public strategieAdjectifsMasculinPluriels: StrategieInclusif = "POINT MÉDIAN",
         public strategieDeterminantsMasculinSingulier: StrategieInclusif = "DEMANDER",
@@ -112,6 +112,7 @@ export async function actualiserTexteAbstrait(
     options: OptionsTexteAbstrait = new OptionsTexteAbstrait()
 ): Promise<TexteAbstrait> {
     const nouveauTexteAbstrait = await creerTexteAbstrait(nouveauTexte, options);
+    console.log("ici", ancienTexteAbstrait, nouveauTexteAbstrait);
     const correspondance = faireCorrespondreTextesAbstraits(ancienTexteAbstrait, nouveauTexteAbstrait);
 
     return correspondance[0].concat(correspondance[1]).concat(correspondance[2])
@@ -173,9 +174,6 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
             result[i] = new Mot(mot);
         }
     }
-
-    console.log("result : ", result);
-
 
     return result;
 }
@@ -393,23 +391,29 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
         i++;
     }
 
+
     // Trouver la partie identique à la fin
     let j = texteAbstrait1.length - 1;
     let k = texteAbstrait2.length - 1;
     while (j >= i && k >= i && texteAbstrait1[j].texteConcret === texteAbstrait2[k].texteConcret) {
-        fin.unshift(choisirEntreDeuxMots(texteAbstrait1[i], texteAbstrait2[i]));
+        let choix = choisirEntreDeuxMots(texteAbstrait1[j], texteAbstrait2[k]);
+        console.log("tiens", texteAbstrait1[j].texteConcret, texteAbstrait2[k].texteConcret, choix.texteConcret);
+        fin.unshift(choix);
         j--;
         k--;
     }
 
     // Identifier la partie insérée
     partieInseree = texteAbstrait2.slice(i, k + 1);
+    console.log(debut, partieInseree, fin, i, k);
 
     return [debut, partieInseree, fin];
 }
 
 
-function choisirEntreDeuxMots(mot1: Mot, mot2: Mot) {
+function choisirEntreDeuxMots(mot1: Mot, mot2: Mot): Mot {
+    console.log("HEIN", mot1, mot2);
+
     // Si l'un des deux est MotGenre et pas l'autre, on le retourne
     if (mot1 instanceof MotGenre && !(mot2 instanceof MotGenre)) return mot1
     else if (!(mot1 instanceof MotGenre) && mot2 instanceof MotGenre) return mot2

@@ -21,7 +21,6 @@
 
   async function onInput() {
     texteAbstrait = await actualiserTexteAbstrait(texteAbstrait, textarea);
-    console.log(texteAbstrait);
   }
 
   let hasBeenCopied = $state(false);
