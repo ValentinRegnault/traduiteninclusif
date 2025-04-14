@@ -33,8 +33,10 @@ export class OptionsTexteAbstrait {
         public strategieNomMasculinPluriels: StrategieInclusif = "DOUBLON",
         public strategieParticipesMasculinSingulier: StrategieInclusif = "DEMANDER",
         public strategieParticipesMasculinPluriel: StrategieInclusif = "DEMANDER",
-        public strategieAdjectifsMasculinSingulier: StrategieInclusif = "DEMANDER",
-        public strategieAdjectifsMasculinPluriels: StrategieInclusif = "POINT MÉDIAN",
+        public strategieAdjectifsMasculinSingulierEpithète: StrategieInclusif = "DEMANDER",
+        public strategieAdjectifsMasculinPlurielsEpithète: StrategieInclusif = "POINT MÉDIAN",
+        public strategieAdjectifsMasculinSingulierAutre: StrategieInclusif = "DEMANDER",
+        public strategieAdjectifsMasculinPlurielsAutre: StrategieInclusif = "DEMANDER",
         public strategieDeterminantsMasculinSingulier: StrategieInclusif = "DEMANDER",
         public strategieDeterminantsMasculinPluriels: StrategieInclusif = "POINT MÉDIAN"
     ) { }
@@ -67,7 +69,7 @@ export async function initDictionnaires() {
         return csv
             .split("\n") // sépare le fichier en lignes
             .map((line) =>
-                line.split(";")
+                line.split(",")
                     .map(flexion => flexion.trim()) // trim les flexions
             ) // séparent chaque ligne en flexion
             // Créer un dictionaire, avec deux indexations : masculin singulier vers flexions, et masculin pluriel vers masculin singulier
@@ -112,7 +114,6 @@ export async function actualiserTexteAbstrait(
     options: OptionsTexteAbstrait = new OptionsTexteAbstrait()
 ): Promise<TexteAbstrait> {
     const nouveauTexteAbstrait = await creerTexteAbstrait(nouveauTexte, options);
-    console.log("ici", ancienTexteAbstrait, nouveauTexteAbstrait);
     const correspondance = faireCorrespondreTextesAbstraits(ancienTexteAbstrait, nouveauTexteAbstrait);
 
     return correspondance[0].concat(correspondance[1]).concat(correspondance[2])
@@ -139,35 +140,68 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
     for (let i = 0; i < tab.length; i++) {
         let mot = tab[i];
         let motLow = mot.toLowerCase()
-        if (motLow in determinants.masculinPlurielVersMasculinSingulier) {
+        let analyse = analyseMot(motLow)
+
+        console.log(mot, analyse)
+
+        if (analyse?.natureMot == "DETERMINANT" && analyse.accordMot == "PLURIEL") {
             result[i] = new MotGenre(mot, options.strategieDeterminantsMasculinPluriels);
         }
-        else if (motLow in determinants.masculinSingulierVersFlexion) {
+        else if (analyse?.natureMot == "DETERMINANT" && analyse.accordMot == "SINGULIER") {
+            // Si le determinant est suivi d'un nom qui a un feminin, alors c'est un MotGenre
             if (i + 2 >= tab.length) result[i] = new Mot(mot);
             else {
-                if (recupererFlexions(tab[i + 2])?.natureMot == "NOM" && aUnFeminin(tab[i + 2])) {
+                if (analyseMot(tab[i + 2])?.natureMot == "NOM" && aUnFeminin(tab[i + 2])) {
                     // si le mot suivant (i + 2, avec l'espace) est un nom qui a un feminin
                     result[i] = new MotGenre(mot, options.strategieDeterminantsMasculinSingulier);
                 }
                 else result[i] = new Mot(mot);
             }
         }
-        else if (motLow in adjectifs.masculinPlurielVersMasculinSingulier) {
-            result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinPluriels);
+        else if (analyse?.natureMot == "ADJECTIF" && analyse.accordMot == "PLURIEL") {
+            // Si un adjectif est epitète d'un nom qui a un feminin, c'est un mot genré, sinon c'est peut etre un mot genre ou pas
+            if (i - 2 >= 0 && analyseMot(tab[i - 2])?.natureMot == "NOM")
+                if (aUnFeminin(tab[i - 2])) {
+                    result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinPlurielsEpithète);
+                }
+                else // c'est un epitète d'un nom qui n'a pas de feminin : il n'est pas genré
+                    result[i] = new Mot(mot)
+            else if (i + 2 < tab.length && analyseMot(tab[i + 2])?.natureMot == "NOM") {
+                if (aUnFeminin(tab[i + 2]))
+                    result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinPlurielsEpithète);
+                else // c'est un epitète d'un nom qui n'a pas de feminin : il n'est pas genré
+                    result[i] = new Mot(mot)
+            }
+            else {
+                result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinPlurielsAutre); // peut etre un attribut du sujet mais pas sur}
+            }
         }
-        else if (motLow in adjectifs.masculinSingulierVersFlexion) {
-            result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulier);
+        else if (analyse?.natureMot == "ADJECTIF" && analyse.accordMot == "SINGULIER") {
+            // Si un adjectif est epitète d'un nom qui a un feminin, c'est un mot genré, sinon c'est peut etre un mot genre ou pas
+            if (i - 2 >= 0 && analyseMot(tab[i - 2])?.natureMot == "NOM")
+                if (aUnFeminin(tab[i - + 2]))
+                    result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulierEpithète);
+                else // c'est un epitète d'un nom qui n'a pas de feminin : il n'est pas genré
+                    result[i] = new Mot(mot)
+            else if (i + 2 < tab.length && analyseMot(tab[i + 2])?.natureMot == "NOM") {
+                if (aUnFeminin(tab[i + 2]))
+                    result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulierEpithète);
+                else // c'est un epitète d'un nom qui n'a pas de feminin : il n'est pas genré
+                    result[i] = new Mot(mot)
+            }
+            else
+                result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulierAutre); // peut etre un attribut du sujet mais pas sur
         }
-        else if (motLow in noms.masculinPlurielVersMasculinSingulier) {
+        else if (analyse?.natureMot == "NOM" && analyse.accordMot == "PLURIEL") {
             result[i] = new MotGenre(mot, options.strategieNomMasculinPluriels);
         }
-        else if (motLow in noms.masculinSingulierVersFlexion) {
+        else if (analyse?.natureMot == "NOM" && analyse.accordMot == "SINGULIER") {
             result[i] = new MotGenre(mot, options.strategieNomMasculinSingulier);
         }
-        else if (motLow in participes.masculinPlurielVersMasculinSingulier) {
+        else if (analyse?.natureMot == "PARTICIPE" && analyse.accordMot == "PLURIEL") {
             result[i] = new MotGenre(mot, options.strategieParticipesMasculinPluriel);
         }
-        else if (motLow in participes.masculinSingulierVersFlexion) {
+        else if (analyse?.natureMot == "PARTICIPE" && analyse.accordMot == "SINGULIER") {
             result[i] = new MotGenre(mot, options.strategieParticipesMasculinSingulier);
         }
         else {
@@ -179,7 +213,7 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
 }
 
 export function enInclusifDoublon(mot: string): [string, string | null] {
-    const motData = recupererFlexions(mot);
+    const motData = analyseMot(mot);
     if (!motData) throw "enInclusifDoublon - Mot introuvable dans les dictionnaire";
 
 
@@ -226,7 +260,7 @@ export function enInclusifDoublon(mot: string): [string, string | null] {
 * @param mot le mot à rendre inclusif
 */
 export function enInclusifPointMedian(mot: string): [string, string | null] {
-    const motData = recupererFlexions(mot);
+    const motData = analyseMot(mot);
     if (!motData) throw "enInclusifPointMedian - Mot introuvable dans les dictionnaire";
 
     if (motData.exception) return ["", motData.exception!]
@@ -249,7 +283,7 @@ export function enInclusifPointMedian(mot: string): [string, string | null] {
 }
 
 export function aUnFeminin(mot: string): boolean {
-    const motData = recupererFlexions(mot);
+    const motData = analyseMot(mot);
 
     if (!motData) return false;
 
@@ -257,7 +291,7 @@ export function aUnFeminin(mot: string): boolean {
 
     let { flexions, masculinSingulier } = motData;
 
-    return (flexions[1] != "" || flexions[2] != "")
+    return ((flexions[1] != "" || flexions[2] != "") && flexions[1] != masculinSingulier)
 }
 
 
@@ -289,7 +323,7 @@ export function texteAbstraitVersTexteConcret(texteAbstrait: TexteAbstrait): str
 
 // ---- FONCTIONS PRIVÉES ----
 
-function recupererFlexions(mot: string): {
+function analyseMot(mot: string): {
     flexions: string[],
     natureMot: "PARTICIPE" | "ADJECTIF" | "NOM" | "DETERMINANT",
     accordMot: "PLURIEL" | "SINGULIER"
@@ -364,7 +398,6 @@ function recupererFlexions(mot: string): {
             exception: (adjectifs.formePointMedianExeption ?? {})[motLow] ?? undefined
         };
     }
-
     else if (motLow in participes.masculinPlurielVersMasculinSingulier) {
         const masculinSingulier = participes.masculinPlurielVersMasculinSingulier[motLow]
         let flexions = participes.masculinSingulierVersFlexion[masculinSingulier];
@@ -423,7 +456,6 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
     let k = texteAbstrait2.length - 1;
     while (j >= i && k >= i && texteAbstrait1[j].texteConcret === texteAbstrait2[k].texteConcret) {
         let choix = choisirEntreDeuxMots(texteAbstrait1[j], texteAbstrait2[k]);
-        console.log("tiens", texteAbstrait1[j].texteConcret, texteAbstrait2[k].texteConcret, choix.texteConcret);
         fin.unshift(choix);
         j--;
         k--;
@@ -431,15 +463,12 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
 
     // Identifier la partie insérée
     partieInseree = texteAbstrait2.slice(i, k + 1);
-    console.log(debut, partieInseree, fin, i, k);
 
     return [debut, partieInseree, fin];
 }
 
 
 function choisirEntreDeuxMots(mot1: Mot, mot2: Mot): Mot {
-    console.log("HEIN", mot1, mot2);
-
     // Si l'un des deux est MotGenre et pas l'autre, on le retourne
     if (mot1 instanceof MotGenre && !(mot2 instanceof MotGenre)) return mot1
     else if (!(mot1 instanceof MotGenre) && mot2 instanceof MotGenre) return mot2
