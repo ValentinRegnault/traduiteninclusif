@@ -29,15 +29,15 @@ export type Correspondances = [PartieIdentique, PartieInseree, PartieIdentique]
 export type StrategieInclusif = "DOUBLON" | "POINT MÉDIAN" | "DEMANDER" | "AUCUNE"
 export class OptionsTexteAbstrait {
     constructor(
-        public strategieNomMasculinSingulier: StrategieInclusif = "DEMANDER",
-        public strategieNomMasculinPluriels: StrategieInclusif = "DOUBLON",
+        public strategieNomMasculinSingulier: StrategieInclusif = "POINT MÉDIAN",
+        public strategieNomMasculinPluriels: StrategieInclusif = "POINT MÉDIAN",
         public strategieParticipesMasculinSingulier: StrategieInclusif = "DEMANDER",
         public strategieParticipesMasculinPluriel: StrategieInclusif = "DEMANDER",
-        public strategieAdjectifsMasculinSingulierEpithète: StrategieInclusif = "DEMANDER",
+        public strategieAdjectifsMasculinSingulierEpithète: StrategieInclusif = "POINT MÉDIAN",
         public strategieAdjectifsMasculinPlurielsEpithète: StrategieInclusif = "POINT MÉDIAN",
         public strategieAdjectifsMasculinSingulierAutre: StrategieInclusif = "DEMANDER",
         public strategieAdjectifsMasculinPlurielsAutre: StrategieInclusif = "DEMANDER",
-        public strategieDeterminantsMasculinSingulier: StrategieInclusif = "DEMANDER",
+        public strategieDeterminantsMasculinSingulier: StrategieInclusif = "POINT MÉDIAN",
         public strategieDeterminantsMasculinPluriels: StrategieInclusif = "POINT MÉDIAN"
     ) { }
 }
@@ -142,8 +142,6 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
         let motLow = mot.toLowerCase()
         let analyse = analyseMot(motLow)
 
-        console.log(mot, analyse)
-
         if (analyse?.natureMot == "DETERMINANT" && analyse.accordMot == "PLURIEL") {
             result[i] = new MotGenre(mot, options.strategieDeterminantsMasculinPluriels);
         }
@@ -193,16 +191,28 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                 result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulierAutre); // peut etre un attribut du sujet mais pas sur
         }
         else if (analyse?.natureMot == "NOM" && analyse.accordMot == "PLURIEL") {
-            result[i] = new MotGenre(mot, options.strategieNomMasculinPluriels);
+            if (aUnFeminin(motLow))
+                result[i] = new MotGenre(mot, options.strategieNomMasculinPluriels);
+            else
+                result[i] = new Mot(mot);
         }
         else if (analyse?.natureMot == "NOM" && analyse.accordMot == "SINGULIER") {
-            result[i] = new MotGenre(mot, options.strategieNomMasculinSingulier);
+            if (aUnFeminin(motLow))
+                result[i] = new MotGenre(mot, options.strategieNomMasculinSingulier);
+            else
+                result[i] = new Mot(mot);
         }
         else if (analyse?.natureMot == "PARTICIPE" && analyse.accordMot == "PLURIEL") {
-            result[i] = new MotGenre(mot, options.strategieParticipesMasculinPluriel);
+            if (aUnFeminin(motLow))
+                result[i] = new MotGenre(mot, options.strategieParticipesMasculinPluriel);
+            else
+                result[i] = new Mot(mot);
         }
         else if (analyse?.natureMot == "PARTICIPE" && analyse.accordMot == "SINGULIER") {
-            result[i] = new MotGenre(mot, options.strategieParticipesMasculinSingulier);
+            if (aUnFeminin(motLow))
+                result[i] = new MotGenre(mot, options.strategieParticipesMasculinSingulier);
+            else
+                result[i] = new Mot(mot);
         }
         else {
             result[i] = new Mot(mot);
@@ -264,6 +274,9 @@ export function enInclusifPointMedian(mot: string): [string, string | null] {
     if (!motData) throw "enInclusifPointMedian - Mot introuvable dans les dictionnaire";
 
     if (motData.exception) return ["", motData.exception!]
+
+    console.log("coucou", motData, mot);
+
 
     let { flexions, masculinSingulier } = motData;
 
@@ -335,6 +348,8 @@ function analyseMot(mot: string): {
         const masculinSingulier = determinants.masculinPlurielVersMasculinSingulier[motLow]
         let flexions = determinants.masculinSingulierVersFlexion[masculinSingulier];
 
+        if (masculinSingulier == "") return undefined
+
         return {
             flexions,
             natureMot: "DETERMINANT",
@@ -357,6 +372,8 @@ function analyseMot(mot: string): {
         const masculinSingulier = noms.masculinPlurielVersMasculinSingulier[motLow]
         let flexions = noms.masculinSingulierVersFlexion[masculinSingulier]
 
+        if (masculinSingulier == "") return undefined
+
         return {
             flexions,
             natureMot: "NOM",
@@ -378,6 +395,7 @@ function analyseMot(mot: string): {
     } else if (motLow in adjectifs.masculinPlurielVersMasculinSingulier) {
         const masculinSingulier = adjectifs.masculinPlurielVersMasculinSingulier[motLow]
 
+        if (masculinSingulier == "") return undefined
 
         let flexions = adjectifs.masculinSingulierVersFlexion[masculinSingulier];
         return {
@@ -401,6 +419,8 @@ function analyseMot(mot: string): {
     else if (motLow in participes.masculinPlurielVersMasculinSingulier) {
         const masculinSingulier = participes.masculinPlurielVersMasculinSingulier[motLow]
         let flexions = participes.masculinSingulierVersFlexion[masculinSingulier];
+
+        if (masculinSingulier == "") return undefined
 
         return {
             flexions,
