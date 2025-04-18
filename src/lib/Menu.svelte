@@ -44,13 +44,12 @@
     <li class="w-full">
         <button
             onclick={() => onswitchstragegy("AUCUNE")}
-            class="flex w-full rounded-md font-bold hover:bg-purple-100 px-2"
+            class="flex w-full rounded-md font-bold hover:bg-red-500 hover:text-white bg-red-100 p-2"
         >
             <img src={erase} alt="" class="h-4" />
             Effacer
         </button>
     </li>
-    <div class="divider m-0"></div>
     <div class="flex flex-row gap-1">
         {#each switchStrategyOptions as strategy}
             <button
