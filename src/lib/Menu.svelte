@@ -11,9 +11,10 @@
     type MenuProps = {
         mot: MotReconnu;
         onswitchstragegy: (nouvelleStrat: StrategieInclusif) => void;
+        title: string;
     };
 
-    const { mot, onswitchstragegy }: MenuProps = $props();
+    const { mot, onswitchstragegy, title }: MenuProps = $props();
 
     const switchStrategyOptions: StrategieInclusif[] = $derived.by(() =>
         (["DOUBLON", "POINT MÉDIAN"] as StrategieInclusif[]).filter(
@@ -34,8 +35,12 @@
 </script>
 
 <div
-    class="menu dropdown-content bg-base-100 rounded-br-sm rounded-bl-md z-1 p-2 shadow-sm max-w-96 flex flex-col gap-1"
+    class="menu dropdown-content bg-base-100 rounded-br-sm rounded-bl-md min-w-64 z-1 p-2 shadow-sm flex flex-col gap-1"
 >
+    <li>
+        {title}
+    </li>
+    <div class="divider m-0"></div>
     <li class="w-full">
         <button
             onclick={() => onswitchstragegy("AUCUNE")}
@@ -46,13 +51,15 @@
         </button>
     </li>
     <div class="divider m-0"></div>
-    {#each switchStrategyOptions as strategy}
-        <button
-            class="rounded-md bg-[#3EA3AC] rounded-5 p-2 flex gap-2 items-center text-white hover:bg-[#7FDDE6] whitespace-nowrap w-full"
-            onclick={() => onswitchstragegy(strategy)}
-        >
-            <img src={replace} alt="heon" class="h-4" />
-            <span class="mr-4">{strategyPreview(strategy)}</span>
-        </button>
-    {/each}
+    <div class="flex flex-row gap-1">
+        {#each switchStrategyOptions as strategy}
+            <button
+                class="rounded-md bg-[#3EA3AC] rounded-5 p-2 flex gap-2 items-center text-white hover:bg-[#7FDDE6] whitespace-nowrap cursor-pointer"
+                onclick={() => onswitchstragegy(strategy)}
+            >
+                <img src={replace} alt="heon" class="h-4" />
+                <span class="mr-4">{strategyPreview(strategy)}</span>
+            </button>
+        {/each}
+    </div>
 </div>

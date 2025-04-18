@@ -48,7 +48,11 @@
             {enInclusif[1]}
             <img src={edit} alt="edit" class="h-4 select-none" />
         </span>
-        <Menu {mot} {onswitchstragegy} />
+        <Menu
+            {mot}
+            {onswitchstragegy}
+            title="Ce mot à automatiquement été rendu inclusif. Si c'est une erreur, vous pouvez effacer. Vous pouvez aussi choisir une autre stratégie."
+        />
     </div>
 {:else if strategie == "DEMANDER" && aUnFeminin(mot)}
     <span class="dropdown relative">
@@ -60,7 +64,12 @@
         >
             {mot.texteConcret}
         </span>
-        <Menu {mot} {onswitchstragegy} />
+        <span class="text-purple-600 px-1">?</span>
+        <Menu
+            {mot}
+            {onswitchstragegy}
+            title="Impossible de déterminer avec assurance que ce mot doit être rendu inclusif."
+        />
     </span>
 {:else}
     {mot.texteConcret}
