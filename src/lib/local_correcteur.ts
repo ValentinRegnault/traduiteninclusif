@@ -252,8 +252,6 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
         .split(/( )|(\n)|(\.)|(\!)|(\?)|(')|(’)|(,)|(;)|(-)|(:)|(\()|(\))|(\[)|(\])|({)|(})|(")|(«)|(»)|(\u2026)|(\u00AB)|(\u00BB)|(\u201C)|(\u201D)|(\u2018)|(\u2019)|(\u2013)|(\u2014)/)
         .filter(part => part !== undefined && part !== "")
 
-    console.log("coucou", texte, tab)
-
     let premierPassage: TexteAbstrait = []
 
     // Premier passage : on essaye de faire collapser les AdjectifsOuNom à soit Adjectif soit Nom
@@ -267,7 +265,7 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
 
             // On essaye de savoir si c'est un adjectif ou un nom
             // Si il est collé à un adjectif, alors c'est un nom, et reciproquement
-            if (motSuivant instanceof Adjectif || motPrecedent instanceof Adjectif || motPrecedent instanceof Determinant) {
+            if (motSuivant instanceof Adjectif || motPrecedent instanceof Adjectif) {
                 // C'est un nom
                 premierPassage[i] = new Nom(
                     motReconnu.texteConcret,
@@ -293,6 +291,9 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                     motReconnu.accords,
                     motSuivant
                 );
+
+                console.log("adj trouvé", mot, premierPassage[i])
+
             }
             else if (motPrecedent instanceof Nom) {
                 // C'est un adjectif epithète du nom précédent
@@ -308,6 +309,18 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                     motReconnu.accords,
                     motPrecedent
                 );
+            }
+            else if (motPrecedent instanceof Determinant) {
+                // C'est un nom
+                premierPassage[i] = new Nom(
+                    motReconnu.texteConcret,
+                    motReconnu.accords == "PLURIEL"
+                        ? options.strategieNomMasculinPluriels
+                        : options.strategieNomMasculinSingulier,
+                    null,
+                    motReconnu.flexions,
+                    motReconnu.accords,
+                )
             }
             else {
                 // On sait pas si c'est un adjectif ou un nom
@@ -359,7 +372,7 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                 : motSuivant instanceof Nom
                     ? motSuivant
                     : null;
-
+            console.log("adj", mot, epitheteDe)
 
             let strategie: StrategieInclusif;
             if (epitheteDe != null) {
@@ -376,12 +389,13 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                 }
             }
             else {
-                if (mot.accords == "PLURIEL") {
+                // Si le mot fini en -ant, ou est précédé de "en", alors c'est surement un gérondif, donc on accorde pas
+                if (mot.texteConcret.endsWith("ant") || motPrecedent?.texteConcret == "en")
+                    strategie = "AUCUNE"
+                else if (mot.accords == "PLURIEL")
                     strategie = options.strategieAdjectifsMasculinPlurielsAutre;
-                }
-                else {
+                else
                     strategie = options.strategieAdjectifsMasculinSingulierAutre;
-                }
             }
 
 
@@ -395,15 +409,30 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
             );
         }
         else if (mot instanceof Nom) {
-            result[i] = new Nom(
-                mot.texteConcret,
-                mot.accords == "PLURIEL"
-                    ? options.strategieNomMasculinPluriels
-                    : options.strategieNomMasculinSingulier,
-                null,
-                mot.flexions,
-                mot.accords,
-            )
+            let motPrecedent = i - 2 >= 0 ? premierPassage[i - 2] : null;
+            let motSuivant: Mot | undefined = premierPassage[i + 2];
+
+            if (
+                // s'il est précédé par "en"
+                motPrecedent?.texteConcret == "en"
+                // ou s'il en -ant, et n'a pas de déterminant avant, ni d'adjectif epithète.
+                || (mot.texteConcret.endsWith("ant") && !(motPrecedent instanceof Determinant) && !(motPrecedent instanceof Adjectif) && !(motSuivant instanceof Adjectif))
+            ) {
+                // c'est probablement un gérondif
+                result[i] = new Mot(mot.texteConcret)
+            }
+            else {
+
+                result[i] = new Nom(
+                    mot.texteConcret,
+                    mot.accords == "PLURIEL"
+                        ? options.strategieNomMasculinPluriels
+                        : options.strategieNomMasculinSingulier,
+                    null,
+                    mot.flexions,
+                    mot.accords,
+                )
+            }
         }
         else if (mot instanceof Participe) {
             result[i] = new Participe(
@@ -433,24 +462,14 @@ export function enInclusifDoublon(texteConcret: string): [string, string | null]
         return ["", exceptionDoublons[mot.texteConcret.toLowerCase()]]
     }
 
+    if (!aUnFeminin(mot)) return [mot.texteConcret, null]
+
     if (mot.accords === "PLURIEL") {
-        if (mot.flexions.masculinSingulier == mot.flexions.femininSingulier || mot.flexions.masculinPluriel == mot.flexions.femininPluriel)
-            return [texteConcret, null]
-
-        if (mot.flexions.femininSingulier == "" && mot.flexions.femininPluriel == "")
-            return [texteConcret, null]
-
         return [
             texteConcret,
             " et " + mot.flexions.femininPluriel
         ]
     } else {
-        if (texteConcret == mot.flexions.femininSingulier)
-            return [texteConcret, null]
-
-        if (mot.flexions.femininSingulier == "" && mot.flexions.femininPluriel == "")
-            return [texteConcret, null]
-
         return [
             texteConcret,
             " et " + mot.flexions.femininSingulier
@@ -501,9 +520,8 @@ export function aUnFeminin(mot: Mot): boolean {
 
     if (mot.texteConcret.toLowerCase() in exceptionDoublons || mot.texteConcret.toLowerCase() in exceptionPointMedian) return true
 
-    if (mot.accords == "SINGULIER") {
-        console.log(mot.flexions);
 
+    if (mot.accords == "SINGULIER") {
         if (mot.flexions.femininSingulier == "") return false
         else if (mot.flexions.masculinSingulier == mot.flexions.femininSingulier) return false
         else return true;
@@ -546,9 +564,8 @@ export function texteAbstraitVersTexteConcret(texteAbstrait: TexteAbstrait): str
 
 function reconnaitreMot(mot: string): MotReconnu | undefined {
     let motLow = mot.toLowerCase()
-    if (determinantsSinguliers.includes(motLow)) {
-        console.log("det", motLow);
 
+    if (determinantsSinguliers.includes(motLow)) {
         return new Determinant(
             mot,
             "PAS ENCORE DEFINIE",
@@ -564,8 +581,6 @@ function reconnaitreMot(mot: string): MotReconnu | undefined {
         );
     }
     else if (determinantsPluriels.includes(motLow)) {
-        console.log("det", motLow);
-
         return new Determinant(
             mot,
             "PAS ENCORE DEFINIE",

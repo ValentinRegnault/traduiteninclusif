@@ -27,13 +27,8 @@
             return enInclusifPointMedian(mot.texteConcret);
         else return null;
     });
-    $inspect(
-        enInclusif,
-        strategie,
-        enInclusif != null &&
-            enInclusif[1] != null &&
-            (strategie == "DOUBLON" || strategie == "POINT MÉDIAN"),
-    );
+
+    $inspect(enInclusif);
 </script>
 
 {#if enInclusif != null && enInclusif[1] != null && (strategie == "DOUBLON" || strategie == "POINT MÉDIAN")}
@@ -60,11 +55,10 @@
             tabindex="0"
             role="button"
             aria-label="Modifier la correction inclusive"
-            class="after:absolute after:bg-purple-600 z-0 after:w-full after:h-1 after:bottom-0 after:left-0"
+            class="bg-purple-200 cursor-pointer hover:bg-purple-100 transition-all p-1 z-0 after:w-full after:h-1 after:bottom-0 after:left-0"
         >
-            {mot.texteConcret}
+            {mot.texteConcret} <span class="text-purple-600 px-1">?</span>
         </span>
-        <span class="text-purple-600 px-1">?</span>
         <Menu
             {mot}
             {onswitchstragegy}
