@@ -133,20 +133,20 @@ export type PartieIdentique = Mot[]
 export type PartieInseree = Mot[]
 export type Correspondances = [PartieIdentique, PartieInseree, PartieIdentique]
 
-export type StrategieInclusif = "DOUBLON" | "POINT MÉDIAN" | "DEMANDER" | "AUCUNE"
+export type StrategieInclusif = "DOUBLON" | "POINT MÉDIAN" | "DEMANDER PROBABLE" | "DEMANDER IMPROBABLE" | "AUCUNE"
 export class OptionsTexteAbstrait {
     constructor(
-        public strategieNomMasculinSingulier: StrategieInclusif = "DEMANDER",
+        public strategieNomMasculinSingulier: StrategieInclusif = "DEMANDER PROBABLE",
         public strategieNomMasculinPluriels: StrategieInclusif = "DOUBLON",
-        public strategieParticipesMasculinSingulier: StrategieInclusif = "DEMANDER",
-        public strategieParticipesMasculinPluriel: StrategieInclusif = "DEMANDER",
+        public strategieParticipesMasculinSingulier: StrategieInclusif = "DEMANDER IMPROBABLE",
+        public strategieParticipesMasculinPluriel: StrategieInclusif = "DEMANDER IMPROBABLE",
         public strategieAdjectifsMasculinSingulierEpithète: StrategieInclusif = "POINT MÉDIAN",
         public strategieAdjectifsMasculinPlurielsEpithète: StrategieInclusif = "POINT MÉDIAN",
-        public strategieAdjectifsMasculinSingulierAutre: StrategieInclusif = "DEMANDER",
-        public strategieAdjectifsMasculinPlurielsAutre: StrategieInclusif = "DEMANDER",
-        public strategieDeterminantsMasculinSingulier: StrategieInclusif = "DEMANDER",
+        public strategieAdjectifsMasculinSingulierAutre: StrategieInclusif = "DEMANDER IMPROBABLE",
+        public strategieAdjectifsMasculinPlurielsAutre: StrategieInclusif = "DEMANDER IMPROBABLE",
+        public strategieDeterminantsMasculinSingulier: StrategieInclusif = "DEMANDER IMPROBABLE",
         public strategieDeterminantsMasculinPluriels: StrategieInclusif = "POINT MÉDIAN",
-        public strategieIndetermineEntreAdjectifEtNom: StrategieInclusif = "DEMANDER"
+        public strategieIndetermineEntreAdjectifEtNom: StrategieInclusif = "DEMANDER PROBABLE"
     ) { }
 }
 

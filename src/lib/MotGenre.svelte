@@ -49,7 +49,7 @@
             title="Ce mot à automatiquement été rendu inclusif. Si c'est une erreur, vous pouvez effacer. Vous pouvez aussi choisir une autre stratégie."
         />
     </div>
-{:else if strategie == "DEMANDER" && aUnFeminin(mot)}
+{:else if strategie == "DEMANDER PROBABLE" && aUnFeminin(mot)}
     <span class="dropdown relative">
         <span
             tabindex="0"
@@ -63,6 +63,22 @@
             {mot}
             {onswitchstragegy}
             title="Impossible de déterminer avec assurance que ce mot doit être rendu inclusif."
+        />
+    </span>
+{:else if strategie == "DEMANDER IMPROBABLE" && aUnFeminin(mot)}
+    <span class="dropdown relative">
+        <span
+            tabindex="0"
+            role="button"
+            aria-label="Modifier la correction inclusive"
+            class="text-purple-700 cursor-pointer hover:bg-purple-100 hover:font-bold transition-all p-1 z-0 after:w-full after:h-1 after:bottom-0 after:left-0"
+        >
+            {mot.texteConcret}
+        </span>
+        <Menu
+            {mot}
+            {onswitchstragegy}
+            title="Ce mot peut-être rendu inclusif mais nous n'avons pas détecter que ce soit necessaire."
         />
     </span>
 {:else}
