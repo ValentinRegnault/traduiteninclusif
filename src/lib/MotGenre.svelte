@@ -6,27 +6,37 @@
         aUnFeminin,
         enInclusifDoublon,
         enInclusifPointMedian,
-        MotGenre,
+        MotReconnu,
         type StrategieInclusif,
     } from "./local_correcteur";
 
     type MotGenreProps = {
-        mot: MotGenre;
+        mot: MotReconnu;
         onswitchstragegy: (nouvelleStrat: StrategieInclusif) => void;
     };
 
     const { mot, onswitchstragegy }: MotGenreProps = $props();
 
+    const strategie = $derived(
+        mot.strategieChoisieParUtilisateur ?? mot.strategieDetectee,
+    );
+
     const enInclusif = $derived.by(() => {
-        if (mot.strategieInclusif == "DOUBLON")
-            return enInclusifDoublon(mot.texteConcret);
-        else if (mot.strategieInclusif == "POINT MÉDIAN")
+        if (strategie == "DOUBLON") return enInclusifDoublon(mot.texteConcret);
+        else if (strategie == "POINT MÉDIAN")
             return enInclusifPointMedian(mot.texteConcret);
         else return null;
     });
+    $inspect(
+        enInclusif,
+        strategie,
+        enInclusif != null &&
+            enInclusif[1] != null &&
+            (strategie == "DOUBLON" || strategie == "POINT MÉDIAN"),
+    );
 </script>
 
-{#if enInclusif != null && enInclusif[1] != null && (mot.strategieInclusif == "DOUBLON" || mot.strategieInclusif == "POINT MÉDIAN")}
+{#if enInclusif != null && enInclusif[1] != null && (strategie == "DOUBLON" || strategie == "POINT MÉDIAN")}
     {enInclusif[0]}
     <div class="dropdown">
         <span
@@ -40,7 +50,7 @@
         </span>
         <Menu {mot} {onswitchstragegy} />
     </div>
-{:else if mot.strategieInclusif == "DEMANDER" && aUnFeminin(mot.texteConcret)}
+{:else if strategie == "DEMANDER" && aUnFeminin(mot)}
     <span class="dropdown relative">
         <span
             tabindex="0"

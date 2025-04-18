@@ -4,8 +4,15 @@ import adjectifsDicoUrl from "/public/adjectifs_flexions.csv?url"
 
 // ---- TYPES ----
 
+type Flexions = {
+    masculinSingulier: string,
+    masculinPluriel: string,
+    femininSingulier: string,
+    femininsPluriels: string
+};
+
 export type Dictionnaire = {
-    masculinSingulierVersFlexion: { [key: string]: string[] },
+    masculinSingulierVersFlexion: { [key: string]: Flexions },
     masculinPlurielVersMasculinSingulier: { [key: string]: string },
     formePointMedianExeption: { [key: string]: string } | undefined
 }
@@ -13,11 +20,122 @@ export type Dictionnaire = {
 export class Mot {
     constructor(public texteConcret: string) { }
 }
-export class MotGenre extends Mot {
-    constructor(public texteConcret: string, public strategieInclusif: StrategieInclusif) {
+export abstract class MotReconnu extends Mot {
+    constructor(
+        public texteConcret: string,
+        public strategieDetectee: StrategieInclusif | "PAS ENCORE DEFINIE",
+        public strategieChoisieParUtilisateur: StrategieInclusif | null,
+        public flexions: Flexions,
+        public accords: "SINGULIER" | "PLURIEL",
+        public exception: string | undefined
+    ) {
         super(texteConcret);
     }
 }
+
+export class Adjectif extends MotReconnu {
+    constructor(
+        public texteConcret: string,
+        public strategieDetectee: StrategieInclusif | "PAS ENCORE DEFINIE",
+        public strategieChoisieParUtilisateur: StrategieInclusif | null,
+        public flexions: Flexions,
+        public accords: "SINGULIER" | "PLURIEL",
+        public exception: string | undefined,
+        public relatifAuNom: Nom | "PAS ENCORE DEFINI" | null
+    ) {
+        super(
+            texteConcret,
+            strategieDetectee,
+            strategieChoisieParUtilisateur,
+            flexions,
+            accords,
+            exception
+        )
+    }
+}
+
+export class AdjectifOuNom extends MotReconnu {
+    constructor(
+        public texteConcret: string,
+        public strategieDetectee: StrategieInclusif | "PAS ENCORE DEFINIE",
+        public strategieChoisieParUtilisateur: StrategieInclusif | null,
+        public flexions: Flexions,
+        public accords: "SINGULIER" | "PLURIEL",
+        public exception: string | undefined,
+    ) {
+        super(
+            texteConcret,
+            strategieDetectee,
+            strategieChoisieParUtilisateur,
+            flexions,
+            accords,
+            exception
+        )
+    }
+}
+
+export class Participe extends MotReconnu {
+    constructor(
+        public texteConcret: string,
+        public strategieDetectee: StrategieInclusif | "PAS ENCORE DEFINIE",
+        public strategieChoisieParUtilisateur: StrategieInclusif | null,
+        public flexions: Flexions,
+        public accords: "SINGULIER" | "PLURIEL",
+        public exception: string | undefined,
+    ) {
+        super(
+            texteConcret,
+            strategieDetectee,
+            strategieChoisieParUtilisateur,
+            flexions,
+            accords,
+            exception
+        )
+    }
+}
+
+export class Nom extends MotReconnu {
+    constructor(
+        public texteConcret: string,
+        public strategieDetectee: StrategieInclusif | "PAS ENCORE DEFINIE",
+        public strategieChoisieParUtilisateur: StrategieInclusif | null,
+        public flexions: Flexions,
+        public accords: "SINGULIER" | "PLURIEL",
+        public exception: string | undefined,
+    ) {
+        super(
+            texteConcret,
+            strategieDetectee,
+            strategieChoisieParUtilisateur,
+            flexions,
+            accords,
+            exception
+        )
+    }
+}
+
+export class Determinant extends MotReconnu {
+    constructor(
+        public texteConcret: string,
+        public strategieDetectee: StrategieInclusif | "PAS ENCORE DEFINIE",
+        public strategieChoisieParUtilisateur: StrategieInclusif | null,
+        public flexions: Flexions,
+        public accords: "SINGULIER" | "PLURIEL",
+        public exception: string | undefined,
+        public relatifAuNom: Nom | "PAS ENCORE DEFINI" | null
+    ) {
+        super(
+            texteConcret,
+            strategieDetectee,
+            strategieChoisieParUtilisateur,
+            flexions,
+            accords,
+            exception
+        )
+    }
+}
+
+
 
 export type TexteAbstrait = Mot[];
 export type ActionUtilisateur = "INSERER_TEXTE" | "ENLEVER_TEXTE"
@@ -29,16 +147,17 @@ export type Correspondances = [PartieIdentique, PartieInseree, PartieIdentique]
 export type StrategieInclusif = "DOUBLON" | "POINT MÉDIAN" | "DEMANDER" | "AUCUNE"
 export class OptionsTexteAbstrait {
     constructor(
-        public strategieNomMasculinSingulier: StrategieInclusif = "POINT MÉDIAN",
-        public strategieNomMasculinPluriels: StrategieInclusif = "POINT MÉDIAN",
+        public strategieNomMasculinSingulier: StrategieInclusif = "DEMANDER",
+        public strategieNomMasculinPluriels: StrategieInclusif = "DOUBLON",
         public strategieParticipesMasculinSingulier: StrategieInclusif = "DEMANDER",
         public strategieParticipesMasculinPluriel: StrategieInclusif = "DEMANDER",
         public strategieAdjectifsMasculinSingulierEpithète: StrategieInclusif = "POINT MÉDIAN",
         public strategieAdjectifsMasculinPlurielsEpithète: StrategieInclusif = "POINT MÉDIAN",
         public strategieAdjectifsMasculinSingulierAutre: StrategieInclusif = "DEMANDER",
         public strategieAdjectifsMasculinPlurielsAutre: StrategieInclusif = "DEMANDER",
-        public strategieDeterminantsMasculinSingulier: StrategieInclusif = "POINT MÉDIAN",
-        public strategieDeterminantsMasculinPluriels: StrategieInclusif = "POINT MÉDIAN"
+        public strategieDeterminantsMasculinSingulier: StrategieInclusif = "DEMANDER",
+        public strategieDeterminantsMasculinPluriels: StrategieInclusif = "POINT MÉDIAN",
+        public strategieIndetermineEntreAdjectifEtNom: StrategieInclusif = "DEMANDER"
     ) { }
 }
 
@@ -48,9 +167,9 @@ let adjectifs: Dictionnaire;
 let participes: Dictionnaire;
 const determinants: Dictionnaire = {
     masculinSingulierVersFlexion: {
-        "il": ["ils", "elle", "elles"],
-        "un": ["", "une", ""],
-        "le": ["", "la", ""]
+        "il": { masculinSingulier: "il", masculinPluriel: "ils", femininSingulier: "elle", femininsPluriels: "elles" },
+        "un": { masculinSingulier: "un", masculinPluriel: "", femininSingulier: "une", femininsPluriels: "" },
+        "le": { masculinSingulier: "le", masculinPluriel: "", femininSingulier: "la", femininsPluriels: "" }
     },
     masculinPlurielVersMasculinSingulier: {
         "ils": "il"
@@ -75,7 +194,13 @@ export async function initDictionnaires() {
             // Créer un dictionaire, avec deux indexations : masculin singulier vers flexions, et masculin pluriel vers masculin singulier
             .reduce(
                 (dict, line: string[]) => {
-                    dict.masculinSingulierVersFlexion[line[0]] = line.slice(1);
+                    dict.masculinSingulierVersFlexion[line[0]] = {
+                        masculinSingulier: line[0],
+                        masculinPluriel: line[1],
+                        femininSingulier: line[2],
+                        femininsPluriels: line[3]
+                    };
+
                     if (line[1])
                         dict.masculinPlurielVersMasculinSingulier[line[1]] = line[0];
                     return dict;
@@ -116,7 +241,10 @@ export async function actualiserTexteAbstrait(
     const nouveauTexteAbstrait = await creerTexteAbstrait(nouveauTexte, options);
     const correspondance = faireCorrespondreTextesAbstraits(ancienTexteAbstrait, nouveauTexteAbstrait);
 
-    return correspondance[0].concat(correspondance[1]).concat(correspondance[2])
+    let fusion = correspondance[0].concat(correspondance[1]).concat(correspondance[2]);
+
+
+    return fusion
 }
 
 /**
@@ -135,121 +263,210 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
         .split(/( )|(\n)|(\.)|(\!)|(\!)|(')|(,)|(;)|(-)/)
         .filter(part => part !== undefined && part !== "")
 
-    let result: TexteAbstrait = []
+    let premierPassage: TexteAbstrait = []
 
+    // Premier passage : on essaye de faire collapser les AdjectifsOuNom à soit Adjectif soit Nom
     for (let i = 0; i < tab.length; i++) {
         let mot = tab[i];
-        let motLow = mot.toLowerCase()
-        let analyse = analyseMot(motLow)
+        let motReconnu = reconnaitreMot(mot)
 
-        if (analyse?.natureMot == "DETERMINANT" && analyse.accordMot == "PLURIEL") {
-            result[i] = new MotGenre(mot, options.strategieDeterminantsMasculinPluriels);
-        }
-        else if (analyse?.natureMot == "DETERMINANT" && analyse.accordMot == "SINGULIER") {
-            // Si le determinant est suivi d'un nom qui a un feminin, alors c'est un MotGenre
-            if (i + 2 >= tab.length) result[i] = new Mot(mot);
+        if (motReconnu instanceof AdjectifOuNom) {
+            let motSuivant = tab[i + 2] ? reconnaitreMot(tab[i + 2]) : null;
+            let motPrecedent = i - 2 >= 0 ? reconnaitreMot(tab[i - 2]) : null;
+
+            // On essaye de savoir si c'est un adjectif ou un nom
+            // Si il est collé à un adjectif, alors c'est un nom, et reciproquement
+            if (motSuivant instanceof Adjectif || motPrecedent instanceof Adjectif || motPrecedent instanceof Determinant) {
+                // C'est un nom
+                premierPassage[i] = new Nom(
+                    motReconnu.texteConcret,
+                    motReconnu.accords == "PLURIEL"
+                        ? options.strategieNomMasculinPluriels
+                        : options.strategieNomMasculinSingulier,
+                    null,
+                    motReconnu.flexions,
+                    motReconnu.accords,
+                    motReconnu.exception
+                )
+            }
+            else if (motSuivant instanceof Nom) {
+                // C'est un adjectif epithète du nom suivant
+                premierPassage[i] = new Adjectif(
+                    motReconnu.texteConcret,
+                    aUnFeminin(motSuivant) ?
+                        motReconnu.accords == "PLURIEL"
+                            ? options.strategieAdjectifsMasculinPlurielsEpithète
+                            : options.strategieAdjectifsMasculinSingulierEpithète
+                        : 'AUCUNE',
+                    null,
+                    motReconnu.flexions,
+                    motReconnu.accords,
+                    motReconnu.exception,
+                    motSuivant
+                );
+            }
+            else if (motPrecedent instanceof Nom) {
+                // C'est un adjectif epithète du nom précédent
+                premierPassage[i] = new Adjectif(
+                    motReconnu.texteConcret,
+                    aUnFeminin(motPrecedent) ?
+                        motReconnu.accords == "PLURIEL"
+                            ? options.strategieAdjectifsMasculinPlurielsEpithète
+                            : options.strategieAdjectifsMasculinSingulierEpithète
+                        : 'AUCUNE',
+                    null,
+                    motReconnu.flexions,
+                    motReconnu.accords,
+                    motReconnu.exception,
+                    motPrecedent
+                );
+            }
             else {
-                if (analyseMot(tab[i + 2])?.natureMot == "NOM" && aUnFeminin(tab[i + 2])) {
-                    // si le mot suivant (i + 2, avec l'espace) est un nom qui a un feminin
-                    result[i] = new MotGenre(mot, options.strategieDeterminantsMasculinSingulier);
-                }
-                else result[i] = new Mot(mot);
+                // On sait pas si c'est un adjectif ou un nom
+                premierPassage[i] = new AdjectifOuNom(
+                    motReconnu.texteConcret,
+                    options.strategieIndetermineEntreAdjectifEtNom,
+                    null,
+                    motReconnu.flexions,
+                    motReconnu.accords,
+                    motReconnu.exception
+                );
             }
-        }
-        else if (analyse?.natureMot == "ADJECTIF" && analyse.accordMot == "PLURIEL") {
-            // Si un adjectif est epitète d'un nom qui a un feminin, c'est un mot genré, sinon c'est peut etre un mot genre ou pas
-            if (i - 2 >= 0 && analyseMot(tab[i - 2])?.natureMot == "NOM")
-                if (aUnFeminin(tab[i - 2])) {
-                    result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinPlurielsEpithète);
-                }
-                else // c'est un epitète d'un nom qui n'a pas de feminin : il n'est pas genré
-                    result[i] = new Mot(mot)
-            else if (i + 2 < tab.length && analyseMot(tab[i + 2])?.natureMot == "NOM") {
-                if (aUnFeminin(tab[i + 2]))
-                    result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinPlurielsEpithète);
-                else // c'est un epitète d'un nom qui n'a pas de feminin : il n'est pas genré
-                    result[i] = new Mot(mot)
-            }
-            else {
-                result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinPlurielsAutre); // peut etre un attribut du sujet mais pas sur}
-            }
-        }
-        else if (analyse?.natureMot == "ADJECTIF" && analyse.accordMot == "SINGULIER") {
-            // Si un adjectif est epitète d'un nom qui a un feminin, c'est un mot genré, sinon c'est peut etre un mot genre ou pas
-            if (i - 2 >= 0 && analyseMot(tab[i - 2])?.natureMot == "NOM")
-                if (aUnFeminin(tab[i - + 2]))
-                    result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulierEpithète);
-                else // c'est un epitète d'un nom qui n'a pas de feminin : il n'est pas genré
-                    result[i] = new Mot(mot)
-            else if (i + 2 < tab.length && analyseMot(tab[i + 2])?.natureMot == "NOM") {
-                if (aUnFeminin(tab[i + 2]))
-                    result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulierEpithète);
-                else // c'est un epitète d'un nom qui n'a pas de feminin : il n'est pas genré
-                    result[i] = new Mot(mot)
-            }
-            else
-                result[i] = new MotGenre(mot, options.strategieAdjectifsMasculinSingulierAutre); // peut etre un attribut du sujet mais pas sur
-        }
-        else if (analyse?.natureMot == "NOM" && analyse.accordMot == "PLURIEL") {
-            if (aUnFeminin(motLow))
-                result[i] = new MotGenre(mot, options.strategieNomMasculinPluriels);
-            else
-                result[i] = new Mot(mot);
-        }
-        else if (analyse?.natureMot == "NOM" && analyse.accordMot == "SINGULIER") {
-            if (aUnFeminin(motLow))
-                result[i] = new MotGenre(mot, options.strategieNomMasculinSingulier);
-            else
-                result[i] = new Mot(mot);
-        }
-        else if (analyse?.natureMot == "PARTICIPE" && analyse.accordMot == "PLURIEL") {
-            if (aUnFeminin(motLow))
-                result[i] = new MotGenre(mot, options.strategieParticipesMasculinPluriel);
-            else
-                result[i] = new Mot(mot);
-        }
-        else if (analyse?.natureMot == "PARTICIPE" && analyse.accordMot == "SINGULIER") {
-            if (aUnFeminin(motLow))
-                result[i] = new MotGenre(mot, options.strategieParticipesMasculinSingulier);
-            else
-                result[i] = new Mot(mot);
         }
         else {
-            result[i] = new Mot(mot);
+            premierPassage[i] = motReconnu ?? new Mot(mot)
         }
     }
+
+    let result: TexteAbstrait = []
+
+
+    for (let i = 0; i < premierPassage.length; i++) {
+        let mot = premierPassage[i];
+
+        if (mot instanceof Determinant) {
+            let motSuivant = premierPassage[i + 2];
+            let epitheteDe = motSuivant instanceof Nom && aUnFeminin(motSuivant)
+                ? motSuivant
+                : null;
+
+            result[i] = new Determinant(
+                mot.texteConcret,
+                epitheteDe != null ?
+                    mot.accords == "PLURIEL"
+                        ? options.strategieDeterminantsMasculinPluriels
+                        : options.strategieDeterminantsMasculinSingulier
+                    : "AUCUNE",
+                null,
+                mot.flexions,
+                mot.accords,
+                mot.exception,
+                epitheteDe
+            );
+        }
+        else if (mot instanceof Adjectif) {
+            let motSuivant = premierPassage[i + 2];
+            let motPrecedent = i - 2 >= 0 ? premierPassage[i - 2] : null;
+
+            let epitheteDe = motPrecedent instanceof Nom
+                ? motPrecedent
+                : motSuivant instanceof Nom
+                    ? motSuivant
+                    : null;
+
+
+            let strategie: StrategieInclusif;
+            if (epitheteDe != null) {
+                if (aUnFeminin(epitheteDe)) {
+                    if (mot.accords == "PLURIEL") {
+                        strategie = options.strategieAdjectifsMasculinPlurielsEpithète;
+                    }
+                    else {
+                        strategie = options.strategieAdjectifsMasculinSingulierEpithète
+                    }
+                }
+                else {
+                    strategie = "AUCUNE"
+                }
+            }
+            else {
+                if (mot.accords == "PLURIEL") {
+                    strategie = options.strategieAdjectifsMasculinPlurielsAutre;
+                }
+                else {
+                    strategie = options.strategieAdjectifsMasculinSingulierAutre;
+                }
+            }
+
+
+            result[i] = new Adjectif(
+                mot.texteConcret,
+                strategie,
+                null,
+                mot.flexions,
+                mot.accords,
+                mot.exception,
+                epitheteDe
+            );
+        }
+        else if (mot instanceof Nom) {
+            result[i] = new Nom(
+                mot.texteConcret,
+                mot.accords == "PLURIEL"
+                    ? options.strategieNomMasculinPluriels
+                    : options.strategieNomMasculinSingulier,
+                null,
+                mot.flexions,
+                mot.accords,
+                mot.exception
+            )
+        }
+        else if (mot instanceof Participe) {
+            result[i] = new Participe(
+                mot.texteConcret,
+                mot.accords == "PLURIEL"
+                    ? options.strategieParticipesMasculinPluriel
+                    : options.strategieParticipesMasculinSingulier,
+                null,
+                mot.flexions,
+                mot.accords,
+                mot.exception
+            );
+        }
+        else {
+            result[i] = mot
+        }
+    }
+
 
     return result;
 }
 
-export function enInclusifDoublon(mot: string): [string, string | null] {
-    const motData = analyseMot(mot);
-    if (!motData) throw "enInclusifDoublon - Mot introuvable dans les dictionnaire";
+export function enInclusifDoublon(texteConcret: string): [string, string | null] {
+    const mot = reconnaitreMot(texteConcret.toLowerCase());
+    if (!mot) throw "enInclusifDoublon - Mot introuvable dans les dictionnaire";
 
+    if (mot.accords === "PLURIEL") {
+        if (mot.flexions.masculinSingulier == mot.flexions.femininSingulier || mot.flexions.masculinPluriel == mot.flexions.femininsPluriels)
+            return [texteConcret, null]
 
-    let { flexions, accordMot, masculinSingulier } = motData;
-
-    if (accordMot === "PLURIEL") {
-        if (masculinSingulier == flexions[1] || flexions[0] == flexions[2])
-            return [mot, null]
-
-        if (flexions[1] == "" && flexions[2] == "")
-            return [mot, null]
+        if (mot.flexions.femininSingulier == "" && mot.flexions.femininsPluriels == "")
+            return [texteConcret, null]
 
         return [
-            mot,
-            " et " + flexions[2]
+            texteConcret,
+            " et " + mot.flexions.femininsPluriels
         ]
     } else {
-        if (mot == flexions[1])
-            return [mot, null]
+        if (texteConcret == mot.flexions.femininSingulier)
+            return [texteConcret, null]
 
-        if (flexions[1] == "" && flexions[2] == "")
-            return [mot, null]
+        if (mot.flexions.femininSingulier == "" && mot.flexions.femininsPluriels == "")
+            return [texteConcret, null]
 
         return [
-            mot,
-            " et " + flexions[1]
+            texteConcret,
+            " et " + mot.flexions.femininSingulier
         ]
     }
 }
@@ -267,59 +484,56 @@ export function enInclusifDoublon(mot: string): [string, string | null] {
 * > enInclusifPointMedian("allé") -> ["allé", "⋅e"]
 * > enInclusifPointMedian("allés") -> ["allé", "⋅e⋅s"]
 * 
-* @param mot le mot à rendre inclusif
+* @param texteConcret le mot à rendre inclusif
 */
-export function enInclusifPointMedian(mot: string): [string, string | null] {
-    const motData = analyseMot(mot);
-    if (!motData) throw "enInclusifPointMedian - Mot introuvable dans les dictionnaire";
+export function enInclusifPointMedian(texteConcret: string): [string, string | null] {
+    const mot = reconnaitreMot(texteConcret.toLowerCase());
+    if (!mot) throw "enInclusifPointMedian - Mot introuvable dans les dictionnaire";
 
-    if (motData.exception) return ["", motData.exception!]
-
-    console.log("coucou", motData, mot);
+    if (mot.exception) return ["", mot.exception!]
 
 
-    let { flexions, masculinSingulier } = motData;
 
     let formesInclusives = formesPointMedian(
-        masculinSingulier,
-        flexions[0],
-        flexions[1],
-        flexions[2]
+        mot.flexions.masculinSingulier,
+        mot.flexions.masculinPluriel,
+        mot.flexions.femininSingulier,
+        mot.flexions.femininsPluriels
     );
 
     return [
-        masculinSingulier,
-        motData.accordMot == "SINGULIER" ?
+        mot.flexions.masculinSingulier,
+        mot.accords == "SINGULIER" ?
             formesInclusives?.inclusifSingulier ?? null
             : formesInclusives?.inclusifPluriel ?? null
     ]
 }
 
-export function aUnFeminin(mot: string): boolean {
-    const motData = analyseMot(mot);
+export function aUnFeminin(mot: Mot): boolean {
+    if (!(mot instanceof MotReconnu)) return false;
 
-    if (!motData) return false;
+    if (mot.exception) return true;
 
-    if (motData.exception) return true;
 
-    let { flexions, masculinSingulier } = motData;
-
-    return ((flexions[1] != "" || flexions[2] != "") && flexions[1] != masculinSingulier)
+    return (
+        (mot.flexions.femininSingulier != "" || mot.flexions.femininsPluriels != "")
+        && mot.flexions.femininSingulier != mot.flexions.masculinSingulier
+    )
 }
 
 
 export function texteAbstraitVersTexteConcret(texteAbstrait: TexteAbstrait): string {
     let texte = ""
     for (let i = 0; i < texteAbstrait.length; i++) {
-        if (texteAbstrait[i] instanceof MotGenre) {
-            if ((texteAbstrait[i] as MotGenre).strategieInclusif == "DOUBLON") {
+        if (texteAbstrait[i] instanceof MotReconnu) {
+            if ((texteAbstrait[i] as MotReconnu).strategieDetectee == "DOUBLON") {
                 let doublon = enInclusifDoublon(texteAbstrait[i].texteConcret.toLowerCase())
                 if (doublon[1] != null) {
                     texte += doublon[0] + doublon[1]
                     continue
                 }
             }
-            else if ((texteAbstrait[i] as MotGenre).strategieInclusif == "POINT MÉDIAN") {
+            else if ((texteAbstrait[i] as MotReconnu).strategieDetectee == "POINT MÉDIAN") {
                 let median = enInclusifPointMedian(texteAbstrait[i].texteConcret.toLowerCase())
                 if (median[1] != null) {
                     texte += median[0] + median[1]
@@ -336,13 +550,7 @@ export function texteAbstraitVersTexteConcret(texteAbstrait: TexteAbstrait): str
 
 // ---- FONCTIONS PRIVÉES ----
 
-function analyseMot(mot: string): {
-    flexions: string[],
-    natureMot: "PARTICIPE" | "ADJECTIF" | "NOM" | "DETERMINANT",
-    accordMot: "PLURIEL" | "SINGULIER"
-    masculinSingulier: string,
-    exception: string | undefined
-} | undefined {
+function reconnaitreMot(mot: string): MotReconnu | undefined {
     let motLow = mot.toLowerCase()
     if (motLow in determinants.masculinPlurielVersMasculinSingulier) {
         const masculinSingulier = determinants.masculinPlurielVersMasculinSingulier[motLow]
@@ -350,23 +558,27 @@ function analyseMot(mot: string): {
 
         if (masculinSingulier == "") return undefined
 
-        return {
+        return new Determinant(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
             flexions,
-            natureMot: "DETERMINANT",
-            accordMot: "PLURIEL",
-            masculinSingulier,
-            exception: (determinants.formePointMedianExeption ?? {})[masculinSingulier] ?? undefined
-        };
+            "PLURIEL",
+            (determinants.formePointMedianExeption ?? {})[masculinSingulier] ?? undefined,
+            "PAS ENCORE DEFINI",
+        );
     } else if (motLow in determinants.masculinSingulierVersFlexion) {
         let flexions = determinants.masculinSingulierVersFlexion[motLow];
 
-        return {
+        return new Determinant(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
             flexions,
-            natureMot: "DETERMINANT",
-            accordMot: "SINGULIER",
-            masculinSingulier: mot,
-            exception: (determinants.formePointMedianExeption ?? {})[motLow] ?? undefined
-        };
+            "SINGULIER",
+            (determinants.formePointMedianExeption ?? {})[flexions.masculinSingulier] ?? undefined,
+            "PAS ENCORE DEFINI",
+        );
     }
     else if (motLow in noms.masculinPlurielVersMasculinSingulier) {
         const masculinSingulier = noms.masculinPlurielVersMasculinSingulier[motLow]
@@ -374,47 +586,92 @@ function analyseMot(mot: string): {
 
         if (masculinSingulier == "") return undefined
 
-        return {
+        if (motLow in adjectifs.masculinPlurielVersMasculinSingulier) return new AdjectifOuNom(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
             flexions,
-            natureMot: "NOM",
-            accordMot: "PLURIEL",
-            masculinSingulier,
-            exception: (noms.formePointMedianExeption ?? {})[masculinSingulier] ?? undefined
-        }
+            "PLURIEL",
+            undefined,
+        );
+
+        return new Nom(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
+            flexions,
+            "PLURIEL",
+            (noms.formePointMedianExeption ?? {})[flexions.masculinSingulier] ?? undefined,
+        );
     }
     else if (motLow in noms.masculinSingulierVersFlexion) {
         let flexions = noms.masculinSingulierVersFlexion[motLow];
 
-        return {
+        if (motLow in adjectifs.masculinSingulierVersFlexion) return new AdjectifOuNom(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
             flexions,
-            natureMot: "NOM",
-            accordMot: "SINGULIER",
-            masculinSingulier: mot,
-            exception: (noms.formePointMedianExeption ?? {})[motLow] ?? undefined
-        };
+            "SINGULIER",
+            undefined,
+        );
+
+        return new Nom(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
+            flexions,
+            "SINGULIER",
+            (noms.formePointMedianExeption ?? {})[flexions.masculinSingulier] ?? undefined,
+        );
     } else if (motLow in adjectifs.masculinPlurielVersMasculinSingulier) {
         const masculinSingulier = adjectifs.masculinPlurielVersMasculinSingulier[motLow]
 
         if (masculinSingulier == "") return undefined
 
         let flexions = adjectifs.masculinSingulierVersFlexion[masculinSingulier];
-        return {
+
+        if (motLow in noms.masculinPlurielVersMasculinSingulier) return new AdjectifOuNom(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
             flexions,
-            natureMot: "ADJECTIF",
-            accordMot: "PLURIEL",
-            masculinSingulier,
-            exception: (adjectifs.formePointMedianExeption ?? {})[masculinSingulier] ?? undefined
-        };
+            "PLURIEL",
+            undefined,
+        );
+
+        return new Adjectif(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
+            flexions,
+            "PLURIEL",
+            (adjectifs.formePointMedianExeption ?? {})[flexions.masculinSingulier] ?? undefined,
+            "PAS ENCORE DEFINI"
+        );
     } else if (motLow in adjectifs.masculinSingulierVersFlexion) {
         let flexions = adjectifs.masculinSingulierVersFlexion[motLow];
 
-        return {
+        if (motLow in adjectifs.masculinPlurielVersMasculinSingulier) return new AdjectifOuNom(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
             flexions,
-            natureMot: "ADJECTIF",
-            accordMot: "SINGULIER",
-            masculinSingulier: mot,
-            exception: (adjectifs.formePointMedianExeption ?? {})[motLow] ?? undefined
-        };
+            "SINGULIER",
+            undefined,
+        );
+
+
+        return new Adjectif(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
+            flexions,
+            "SINGULIER",
+            undefined,
+            "PAS ENCORE DEFINI"
+        );
+
     }
     else if (motLow in participes.masculinPlurielVersMasculinSingulier) {
         const masculinSingulier = participes.masculinPlurielVersMasculinSingulier[motLow]
@@ -422,23 +679,25 @@ function analyseMot(mot: string): {
 
         if (masculinSingulier == "") return undefined
 
-        return {
+        return new Participe(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
             flexions,
-            natureMot: "PARTICIPE",
-            accordMot: "PLURIEL",
-            masculinSingulier,
-            exception: (participes.formePointMedianExeption ?? {})[masculinSingulier] ?? undefined
-        };
+            "PLURIEL",
+            undefined,
+        );
     } else if (motLow in participes.masculinSingulierVersFlexion) {
         let flexions = participes.masculinSingulierVersFlexion[motLow];
 
-        return {
+        return new Participe(
+            mot,
+            "PAS ENCORE DEFINIE",
+            null,
             flexions,
-            natureMot: "PARTICIPE",
-            accordMot: "SINGULIER",
-            masculinSingulier: mot,
-            exception: (participes.formePointMedianExeption ?? {})[motLow] ?? undefined
-        };
+            "SINGULIER",
+            undefined,
+        );
     } else {
         return undefined
     }
@@ -466,7 +725,7 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
     // Trouver la partie identique au début
     let i = 0;
     while (i < texteAbstrait1.length && i < texteAbstrait2.length && texteAbstrait1[i].texteConcret === texteAbstrait2[i].texteConcret) {
-        debut.push(choisirEntreDeuxMots(texteAbstrait1[i], texteAbstrait2[i]));
+        debut.push(fusionnerMot(texteAbstrait1[i], texteAbstrait2[i]));
         i++;
     }
 
@@ -475,7 +734,7 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
     let j = texteAbstrait1.length - 1;
     let k = texteAbstrait2.length - 1;
     while (j >= i && k >= i && texteAbstrait1[j].texteConcret === texteAbstrait2[k].texteConcret) {
-        let choix = choisirEntreDeuxMots(texteAbstrait1[j], texteAbstrait2[k]);
+        let choix = fusionnerMot(texteAbstrait1[j], texteAbstrait2[k]);
         fin.unshift(choix);
         j--;
         k--;
@@ -484,20 +743,19 @@ function faireCorrespondreTextesAbstraits(texteAbstrait1: TexteAbstrait, texteAb
     // Identifier la partie insérée
     partieInseree = texteAbstrait2.slice(i, k + 1);
 
+
+
     return [debut, partieInseree, fin];
 }
 
 
-function choisirEntreDeuxMots(mot1: Mot, mot2: Mot): Mot {
-    // Si l'un des deux est MotGenre et pas l'autre, on le retourne
-    if (mot1 instanceof MotGenre && !(mot2 instanceof MotGenre)) return mot1
-    else if (!(mot1 instanceof MotGenre) && mot2 instanceof MotGenre) return mot2
-    // Si les deux sont Mot, on retourne mot1
-    else if (!(mot1 instanceof MotGenre) && !(mot2 instanceof MotGenre)) return mot1
-    // Par défault on retourne le mot1, sauf si le mot2 à une stratégie plus précise que DEMANDER
-    else if ((mot1 as MotGenre).strategieInclusif == "DEMANDER" && (mot2 as MotGenre).strategieInclusif != "DEMANDER") return mot2
-    else return mot1
-
+function fusionnerMot(mot1: Mot, mot2: Mot): Mot {
+    if (!(mot1 instanceof MotReconnu) || !(mot2 instanceof MotReconnu)) return mot2;
+    if (mot1.texteConcret != mot2.texteConcret) return mot2;
+    else {
+        mot2.strategieChoisieParUtilisateur = mot1.strategieChoisieParUtilisateur;
+        return mot2;
+    }
 }
 
 

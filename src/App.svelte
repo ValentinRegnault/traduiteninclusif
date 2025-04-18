@@ -4,7 +4,7 @@
     type TexteAbstrait,
     actualiserTexteAbstrait,
     Mot,
-    MotGenre,
+    MotReconnu,
     initDictionnaires,
     enInclusifPointMedian,
     enInclusifDoublon,
@@ -15,10 +15,12 @@
   import logo from "./assets/logo.png";
   import copy from "./assets/copy.svg";
   import check from "./assets/check.svg";
-  import MotGenreComposant from "./lib/MotGenre.svelte";
+  import MotGenre from "./lib/MotGenre.svelte";
 
   let textarea = $state("");
   let texteAbstrait = $state([] as TexteAbstrait);
+
+  $inspect(texteAbstrait);
 
   async function onInput() {
     texteAbstrait = await actualiserTexteAbstrait(texteAbstrait, textarea);
@@ -98,14 +100,23 @@
       {:then _}
         {#if texteAbstrait.length > 0}
           {#each texteAbstrait as mot, indice}
-            {#if mot instanceof MotGenre && mot.strategieInclusif != "AUCUNE"}
-              <MotGenreComposant
+            {#if mot instanceof MotReconnu && mot.strategieDetectee != "AUCUNE"}
+              <MotGenre
                 {mot}
                 onswitchstragegy={(nouvelleStrat: StrategieInclusif) => {
-                  texteAbstrait[indice] = new MotGenre(
-                    texteAbstrait[indice].texteConcret,
-                    nouvelleStrat,
+                  if (!(texteAbstrait[indice] instanceof MotReconnu))
+                    throw "Impossible de changer la stratégie d'un mot non reconnu";
+
+                  let nouveauMot: MotReconnu = {
+                    ...texteAbstrait[indice],
+                    strategieChoisieParUtilisateur: nouvelleStrat,
+                  };
+
+                  Object.setPrototypeOf(
+                    nouveauMot,
+                    Object.getPrototypeOf(texteAbstrait[indice]),
                   );
+                  texteAbstrait[indice] = nouveauMot;
                 }}
               />
             {:else if mot.texteConcret == "\n"}

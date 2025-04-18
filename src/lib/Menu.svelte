@@ -4,12 +4,12 @@
     import {
         enInclusifDoublon,
         enInclusifPointMedian,
-        MotGenre,
+        MotReconnu,
         type StrategieInclusif,
     } from "./local_correcteur";
 
     type MenuProps = {
-        mot: MotGenre;
+        mot: MotReconnu;
         onswitchstragegy: (nouvelleStrat: StrategieInclusif) => void;
     };
 
@@ -17,7 +17,7 @@
 
     const switchStrategyOptions: StrategieInclusif[] = $derived.by(() =>
         (["DOUBLON", "POINT MÉDIAN"] as StrategieInclusif[]).filter(
-            (strat) => strat != mot.strategieInclusif,
+            (strat) => strat != mot.strategieDetectee,
         ),
     );
 
