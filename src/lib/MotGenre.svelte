@@ -71,7 +71,7 @@
             tabindex="0"
             role="button"
             aria-label="Modifier la correction inclusive"
-            class="text-purple-700 cursor-pointer hover:bg-purple-100 hover:font-bold transition-all p-1 z-0 after:w-full after:h-1 after:bottom-0 after:left-0"
+            class="italic text-slate-700 cursor-pointer hover:bg-purple-100 font-bold transition-all p-1 z-0"
         >
             {mot.texteConcret}
         </span>

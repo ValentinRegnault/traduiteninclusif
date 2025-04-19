@@ -139,12 +139,12 @@ export class OptionsTexteAbstrait {
         public strategieNomMasculinSingulier: StrategieInclusif = "DEMANDER PROBABLE",
         public strategieNomMasculinPluriels: StrategieInclusif = "DOUBLON",
         public strategieParticipesMasculinSingulier: StrategieInclusif = "DEMANDER IMPROBABLE",
-        public strategieParticipesMasculinPluriel: StrategieInclusif = "DEMANDER IMPROBABLE",
-        public strategieAdjectifsMasculinSingulierEpithète: StrategieInclusif = "POINT MÉDIAN",
+        public strategieParticipesMasculinPluriel: StrategieInclusif = "DEMANDER PROBABLE",
+        public strategieAdjectifsMasculinSingulierEpithète: StrategieInclusif = "DEMANDER PROBABLE",
         public strategieAdjectifsMasculinPlurielsEpithète: StrategieInclusif = "POINT MÉDIAN",
         public strategieAdjectifsMasculinSingulierAutre: StrategieInclusif = "DEMANDER IMPROBABLE",
-        public strategieAdjectifsMasculinPlurielsAutre: StrategieInclusif = "DEMANDER IMPROBABLE",
-        public strategieDeterminantsMasculinSingulier: StrategieInclusif = "DEMANDER IMPROBABLE",
+        public strategieAdjectifsMasculinPlurielsAutre: StrategieInclusif = "DEMANDER PROBABLE",
+        public strategieDeterminantsMasculinSingulier: StrategieInclusif = "DEMANDER PROBABLE",
         public strategieDeterminantsMasculinPluriels: StrategieInclusif = "POINT MÉDIAN",
         public strategieIndetermineEntreAdjectifEtNom: StrategieInclusif = "DEMANDER PROBABLE"
     ) { }
@@ -154,19 +154,21 @@ export class OptionsTexteAbstrait {
 let noms: Dictionnaire;
 let adjectifs: Dictionnaire;
 let participes: Dictionnaire;
-const determinantsSinguliers = ["le", "la", 'un', 'une', 'de', 'l', "du"]
+const determinantsSinguliers = ["le", "la", 'un', 'une', 'de', 'l', "du", "tout"]
 const determinantsPluriels = ["des", "les"]
 const exceptionDoublons: { [key: string]: string } = {
     "il": "il ou elle",
     "ils": "ils et elles",
     "le": "le ou la",
     "un": "un ou une",
+    "tous": "tous et toutes",
 }
 const exceptionPointMedian: { [key: string]: string } = {
     "il": "iel",
     "ils": "iels",
     "le": "la⋅le",
     "un": "un⋅e",
+    "tous": "tous⋅tes"
 }
 
 
@@ -281,8 +283,8 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                 // C'est un adjectif epithète du nom suivant
                 premierPassage[i] = new Adjectif(
                     motReconnu.texteConcret,
-                    aUnFeminin(motSuivant) ?
-                        motReconnu.accords == "PLURIEL"
+                    aUnFeminin(motSuivant)
+                        ? motReconnu.accords == "PLURIEL"
                             ? options.strategieAdjectifsMasculinPlurielsEpithète
                             : options.strategieAdjectifsMasculinSingulierEpithète
                         : 'AUCUNE',
@@ -291,9 +293,6 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                     motReconnu.accords,
                     motSuivant
                 );
-
-                console.log("adj trouvé", mot, premierPassage[i])
-
             }
             else if (motPrecedent instanceof Nom) {
                 // C'est un adjectif epithète du nom précédent
@@ -310,7 +309,7 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                     motPrecedent
                 );
             }
-            else if (motPrecedent instanceof Determinant) {
+            else if (motPrecedent instanceof Determinant && !(motSuivant instanceof AdjectifOuNom || motPrecedent instanceof AdjectifOuNom)) {
                 // C'est un nom
                 premierPassage[i] = new Nom(
                     motReconnu.texteConcret,
@@ -372,7 +371,6 @@ export function creerTexteAbstrait(texte: string, options: OptionsTexteAbstrait)
                 : motSuivant instanceof Nom
                     ? motSuivant
                     : null;
-            console.log("adj", mot, epitheteDe)
 
             let strategie: StrategieInclusif;
             if (epitheteDe != null) {

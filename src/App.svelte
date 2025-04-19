@@ -91,7 +91,7 @@
           <img src={check} alt="" class="h-4" />
           Copié
         {:else}
-          <img src={copy} alt="" class="h-4" />
+          <img src={copy} alt="" class="h-4 z-20" />
           Copier
         {/if}
       </button>
