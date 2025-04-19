@@ -4,23 +4,25 @@ Bienvenue dans le projet **Traducteur Automatique en Écriture Inclusive** ! �
 
 ## Pourquoi l'Écriture Inclusive ? 🤔
 
-L'écriture inclusive est bien plus qu'une simple tendance linguistique ; c'est un moyen puissant de reconnaître et de valoriser la diversité. En utilisant des formes de langage qui incluent explicitement toutes les identités de genre, nous contribuons à :
+Lorsque nous parlons, nous discriminons sans nous en rendre compte. Dans une étude intitulée "Un ministre peut-il tomber enceinte ?", Markus Brauer fait l'expérience suivante : demander à des passants de citer des candidats potentiel pour être premier ministre. Puis, il recommence en demandant cette fois des noms de "candidats ou candidates" pour être "premier ou première ministre". Et là, 3 fois plus de femmes sont citées. Ce qui prouve que le langage a un impact sur la façon dont nous percevons les choses, dont nous nous représentons interieurement les situations décrites par le langage.
 
-- **Renforcer l'égalité** : En rendant visible la présence des femmes et des personnes non-binaires dans le langage. 👩‍💼👨‍💼
-- **Promouvoir la diversité** : En reflétant la richesse et la variété des identités dans notre société. 🌍
-- **Favoriser l'inclusion** : En créant un environnement où chacun·e se sent représenté·e et respecté·e. 🤝
+L'écriture inclusive vise à supprimer ce biai en rendant visible la présence des femmes et des personnes non-binaires dans le langage.
+Elle se base sur :
+- La féminisation des mots qui doivent l'être (ex : "la ministre" au lieu de "le ministre")
+- L'utilisation du doublon (ex : "les étudiants et étudiantes" au lieu de "les étudiants")
+- L'utilisation du point médian (ex : "les étudiant·e·s" au lieu de "les étudiants")
 
 ## Fonctionnalités 🛠️
 
 - **Dictionnaires Intégrés** : Utilisation de dictionnaires pour gérer les flexions de genre et de nombre. 📚
-- **Automatisation** : Conversion automatique de textes en écriture inclusive. 🤖
-- **Personnalisation** : Possibilité d'ajouter ou de modifier des règles de flexion selon vos besoins spécifiques. ⚙️
+- **Automatisation** : Conversion automatique d'une partie du texte en écriture inclusive. 🤖
+- **Aide à la correction** : Pour certains mots, signale la possibilité de les rendre inclusifs et suggère la modification à l'utilisateur. ⚙️
 
 ## Comment ça Marche ? ⚙️
 
-1. **Analyse du Texte** : Le texte d'entrée est analysé pour identifier les mots nécessitant une flexion inclusive. 🔍
-2. **Application des Règles** : Les règles de flexion sont appliquées en utilisant les dictionnaires intégrés. 📜
-3. **Génération du Texte Inclusif** : Un texte en écriture inclusive est généré, prêt à être utilisé. 📝
+1. **Reconnaitre les mots** : On recherche chaque mot dans un dictionnaire, pour voir s'il existe et s'il à un feminin. 🔍
+2. **Liens entre les mots** : Essayé de faire le lien entre un adjectif epithète et le nom commun associé. 📜
+3. **Génération du Texte Inclusif** : Un texte en écriture inclusive est généré, et des modifications supplémentaires sont proposées à l'utilisateur. 📝
 
 ## Installation 💻
 
@@ -40,6 +42,12 @@ Pour utiliser le Traducteur Automatique en Écriture Inclusive, suivez ces étap
 3. **Lancez l'Outil** :
    ```bash
    npm run dev # ouvrez votre navigateur à l'adresse http://localhost:5173 !
+   ```
+
+4. **Deployer** :
+   ```bash
+   npm run build
+   npm run deploy
    ```
 
 ## Contribution 🤝
@@ -62,4 +70,4 @@ Pour toute question ou suggestion, n'hésitez pas à me contacter à [valentinre
 
 ---
 
-Rejoignez-nous dans cette initiative pour rendre notre langage plus inclusif et représentatif ! 🌈✨
+Rejoignez-moi dans cette initiative pour rendre notre langage plus inclusif et représentatif ! 🌈✨
